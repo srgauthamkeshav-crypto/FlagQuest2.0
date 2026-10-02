@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>FlagQuest - 195 Country Flags</title>
+
+<style>
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f6f8;
+    color: #222;
+}
+
+header {
+    background: #1f2937;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+header h1 {
+    margin: 0 0 8px 0;
+}
+
+.progress {
+    font-size: 16px;
+    margin-top: 8px;
+}
+
+.controls {
+    padding: 15px;
+    text-align: center;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 5px;
+    font-size: 15px;
+    cursor: pointer;
+    background: #2563eb;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.secondary {
+    background: #6b7280;
+}
+
+.green {
+    background: #16a34a;
+}
+
+.red {
+    background: #dc2626;
+}
+
+.practice {
+    background: #7c3aed;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 12px;
+    padding: 15px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.card.learned {
+    border: 3px solid #22c55e;
+}
+
+.flag {
+    font-size: 60px;
+    line-height: 1.2;
+    margin: 5px 0 10px 0;
+    display: none;
+    cursor: pointer;
+}
+
+.country-name {
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.country-name:hover {
+    background: #f0f0f0;
+}
+
+.checkbox-area {
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.checkbox-area input {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+.status {
+    margin-top: 6px;
+    color: #16a34a;
+    font-weight: bold;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.65);
+}
+
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    margin: 8% auto;
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.practice-flag {
+    font-size: 120px;
+    margin: 20px;
+}
+
+.question {
+    font-size: 25px;
+    font-weight: bold;
+    margin: 20px;
+}
+
+.answer-input {
+    padding: 12px;
+    font-size: 18px;
+    width: 80%;
+    max-width: 350px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+}
+
+.result {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 15px;
+}
+
+.score {
+    font-size: 16px;
+    color: #555;
+}
+
+.close {
+    background: #dc2626;
+}
+
+.hidden-flag {
+    filter: blur(15px);
+    cursor: pointer;
+}
+
+@media (max-width: 500px) {
+
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 8px;
+        gap: 8px;
+    }
+
+    .card {
+        padding: 10px;
+    }
+
+    .flag {
+        font-size: 45px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <h1>🌍 FlagQuest</h1>
+
+    <div class="progress" id="progressText">
+        0 / 195 flags learned
+    </div>
+
+</header>
+
+
+<div class="controls">
+
+    <button class="practice" onclick="startCountryToFlag()">
+        🌎 Learned: Country → Flag
+    </button>
+
+    <button class="practice" onclick="startFlagToCountry()">
+        🏳️ Learned: Flag → Country
+    </button>
+
+    <br>
+
+    <button onclick="shuffleCountries()">
+        🔀 Shuffle
+    </button>
+
+    <button onclick="showAllFlags()">
+        👁️ Show All
+    </button>
+
+    <button class="secondary" onclick="hideAllFlags()">
+        🙈 Hide All
+    </button>
+
+    <br>
+
+    <button class="green" onclick="selectAll()">
+        ☑️ Select All
+    </button>
+
+    <button class="red" onclick="resetProgress()">
+        ↩️ Reset Progress
+    </button>
+
+</div>
+
+
+<div class="grid" id="countryGrid"></div>
+
+
+<!-- PRACTICE MODAL -->
+
+<div class="modal" id="practiceModal">
+
+    <div class="modal-content">
+
+        <div class="score" id="scoreText">
+            Score: 0 / 0
+        </div>
+
+        <div id="practiceArea"></div>
+
+        <button onclick="nextQuestion()">
+            ➡️ Next
+        </button>
+
+        <button class="close" onclick="closePractice()">
+            ✖ Close
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+/* =====================================================
+   195 COUNTRIES
+===================================================== */
+
+var countries = [
+
+["af","Afghanistan"],
+["al","Albania"],
+["dz","Algeria"],
+["ad","Andorra"],
+["ao","Angola"],
+["ag","Antigua and Barbuda"],
+["ar","Argentina"],
+["am","Armenia"],
+["au","Australia"],
+["at","Austria"],
+["az","Azerbaijan"],
+
+["bs","Bahamas"],
+["bh","Bahrain"],
+["bd","Bangladesh"],
+["bb","Barbados"],
+["by","Belarus"],
+["be","Belgium"],
+["bz","Belize"],
+["bj","Benin"],
+["bt","Bhutan"],
+["bo","Bolivia"],
+["ba","Bosnia and Herzegovina"],
+["bw","Botswana"],
+["br","Brazil"],
+["bn","Brunei"],
+["bg","Bulgaria"],
+["bf","Burkina Faso"],
+["bi","Burundi"],
+
+["cv","Cabo Verde"],
+["kh","Cambodia"],
+["cm","Cameroon"],
+["ca","Canada"],
+["cf","Central African Republic"],
+["td","Chad"],
+["cl","Chile"],
+["cn","China"],
+["co","Colombia"],
+["km","Comoros"],
+["cg","Congo"],
+["cd","Democratic Republic of the Congo"],
+["cr","Costa Rica"],
+["ci","Côte d'Ivoire"],
+["hr","Croatia"],
+["cu","Cuba"],
+["cy","Cyprus"],
+["cz","Czechia"],
+
+["dk","Denmark"],
+["dj","Djibouti"],
+["dm","Dominica"],
+["do","Dominican Republic"],
+
+["ec","Ecuador"],
+["eg","Egypt"],
+["sv","El Salvador"],
+["gq","Equatorial Guinea"],
+["er","Eritrea"],
+["ee","Estonia"],
+["sz","Eswatini"],
+["et","Ethiopia"],
+
+["fj","Fiji"],
+["fi","Finland"],
+["fr","France"],
+
+["ga","Gabon"],
+["gm","Gambia"],
+["ge","Georgia"],
+["de","Germany"],
+["gh","Ghana"],
+["gr","Greece"],
+["gd","Grenada"],
+["gt","Guatemala"],
+["gn","Guinea"],
+["gw","Guinea-Bissau"],
+["gy","Guyana"],
+
+["ht","Haiti"],
+["hn","Honduras"],
+["hu","Hungary"],
+
+["is","Iceland"],
+["in","India"],
+["id","Indonesia"],
+["ir","Iran"],
+["iq","Iraq"],
+["ie","Ireland"],
+["il","Israel"],
+["it","Italy"],
+
+["jm","Jamaica"],
+["jp","Japan"],
+["jo","Jordan"],
+
+["kz","Kazakhstan"],
+["ke","Kenya"],
+["ki","Kiribati"],
+["kp","North Korea"],
+["kr","South Korea"],
+["kw","Kuwait"],
+["kg","Kyrgyzstan"],
+
+["la","Laos"],
+["lv","Latvia"],
+["lb","Lebanon"],
+["ls","Lesotho"],
+["lr","Liberia"],
+["ly","Libya"],
+["li","Liechtenstein"],
+["lt","Lithuania"],
+["lu","Luxembourg"],
+
+["mg","Madagascar"],
+["mw","Malawi"],
+["my","Malaysia"],
+["mv","Maldives"],
+["ml","Mali"],
+["mt","Malta"],
+["mh","Marshall Islands"],
+["mr","Mauritania"],
+["mu","Mauritius"],
+["mx","Mexico"],
+["fm","Micronesia"],
+["md","Moldova"],
+["mc","Monaco"],
+["mn","Mongolia"],
+["me","Montenegro"],
+["ma","Morocco"],
+["mz","Mozambique"],
+["mm","Myanmar"],
+
+["na","Namibia"],
+["nr","Nauru"],
+["np","Nepal"],
+["nl","Netherlands"],
+["nz","New Zealand"],
+["ni","Nicaragua"],
+["ne","Niger"],
+["ng","Nigeria"],
+["mk","North Macedonia"],
+["no","Norway"],
+
+["om","Oman"],
+
+["pk","Pakistan"],
+["pw","Palau"],
+["ps","Palestine"],
+["pa","Panama"],
+["pg","Papua New Guinea"],
+["py","Paraguay"],
+["pe","Peru"],
+["ph","Philippines"],
+["pl","Poland"],
+["pt","Portugal"],
+
+["qa","Qatar"],
+
+["ro","Romania"],
+["ru","Russia"],
+["rw","Rwanda"],
+
+["kn","Saint Kitts and Nevis"],
+["lc","Saint Lucia"],
+["vc","Saint Vincent and the Grenadines"],
+["ws","Samoa"],
+["sm","San Marino"],
+["st","São Tomé and Príncipe"],
+["sa","Saudi Arabia"],
+["sn","Senegal"],
+["rs","Serbia"],
+["sc","Seychelles"],
+["sl","Sierra Leone"],
+["sg","Singapore"],
+["sk","Slovakia"],
+["si","Slovenia"],
+["sb","Solomon Islands"],
+["so","Somalia"],
+["za","South Africa"],
+["ss","South Sudan"],
+["es","Spain"],
+["lk","Sri Lanka"],
+["sd","Sudan"],
+["sr","Suriname"],
+["se","Sweden"],
+["ch","Switzerland"],
+["sy","Syria"],
+
+["tj","Tajikistan"],
+["tz","Tanzania"],
+["th","Thailand"],
+["tl","Timor-Leste"],
+["tg","Togo"],
+["to","Tonga"],
+["tt","Trinidad and Tobago"],
+["tn","Tunisia"],
+["tr","Turkey"],
+["tm","Turkmenistan"],
+["tv","Tuvalu"],
+
+["ug","Uganda"],
+["ua","Ukraine"],
+["ae","United Arab Emirates"],
+["gb","United Kingdom"],
+["us","United States"],
+["uy","Uruguay"],
+["uz","Uzbekistan"],
+
+["vu","Vanuatu"],
+["va","Vatican City"],
+["ve","Venezuela"],
+["vn","Vietnam"],
+
+["ye","Yemen"],
+
+["zm","Zambia"],
+["zw","Zimbabwe"]
+
+];
+
+
+/* =====================================================
+   LEARNED PROGRESS
+===================================================== */
+
+var learned = {};
+
+var storageKey = "flagquest_learned_v1";
+
+
+function loadProgress() {
+
+    try {
+
+        var saved =
+            localStorage.getItem(storageKey);
+
+        if (saved) {
+
+            learned =
+                JSON.parse(saved);
+
+        }
+
+    } catch (error) {
+
+        learned = {};
+
+    }
+
+}
+
+
+function saveProgress() {
+
+    try {
+
+        localStorage.setItem(
+            storageKey,
+            JSON.stringify(learned)
+        );
+
+    } catch (error) {
+
+    }
+
+}
+
+
+/* =====================================================
+   FLAG EMOJI
+===================================================== */
+
+function getFlag(code) {
+
+    return code
+        .toUpperCase()
+        .split("")
+        .map(function(letter) {
+
+            return String.fromCodePoint(
+                127397 +
+                letter.charCodeAt(0)
+            );
+
+        })
+        .join("");
+
+}
+
+
+/* =====================================================
+   UPDATE PROGRESS
+===================================================== */
+
+function updateProgress() {
+
+    var count = 0;
+
+    for (
+        var i = 0;
+        i < countries.length;
+        i++
+    ) {
+
+        if (learned[countries[i][0]]) {
+
+            count++;
+
+        }
+
+    }
+
+    var percentage =
+        Math.round(
+            (count / countries.length) * 100
+        );
+
+    document.getElementById(
+        "progressText"
+    ).innerHTML =
+
+        count +
+        " / " +
+        countries.length +
+        " flags learned (" +
+        percentage +
+        "%)";
+
+}
+
+
+/* =====================================================
+   SHOW / HIDE INDIVIDUAL FLAG
+===================================================== */
+
+function toggleFlag(flagElement) {
+
+    if (
+        flagElement.style.display === "none" ||
+        flagElement.style.display === ""
+    ) {
+
+        flagElement.style.display = "block";
+
+    } else {
+
+        flagElement.style.display = "none";
+
+    }
+
+}
+
+
+/* =====================================================
+   RENDER COUNTRY CARDS
+===================================================== */
+
+function renderCountries() {
+
+    var grid =
+        document.getElementById(
+            "countryGrid"
+        );
+
+    grid.innerHTML = "";
+
+
+    for (
+        var i = 0;
+        i < countries.length;
+        i++
+    ) {
+
+        var code =
+            countries[i][0];
+
+        var name =
+            countries[i][1];
+
+
+        var card =
+            document.createElement(
+                "div"
+            );
+
+        card.className = "card";
+
+
+        if (learned[code]) {
+
+            card.className +=
+                " learned";
+
+        }
+
+
+        /*
+         IMPORTANT:
+
+         The flag starts hidden.
+
+         Clicking the COUNTRY NAME
+         reveals the flag.
+
+         Clicking the FLAG
+         hides the flag.
+
+         The checkbox is completely
+         separate from the flag.
+        */
+
+        card.innerHTML =
+
+            '<div ' +
+
+                'class="flag" ' +
+
+                'id="flag-' +
+                code +
+                '" ' +
+
+                'onclick="toggleFlag(this)">' +
+
+                getFlag(code) +
+
+            '</div>' +
+
+
+            '<div ' +
+
+                'class="country-name" ' +
+
+                'onclick="showCountryFlag(\'' +
+                code +
+                '\')">' +
+
+                name +
+
+            '</div>' +
+
+
+            '<div class="checkbox-area">' +
+
+                '<label>' +
+
+                    '<input ' +
+
+                        'type="checkbox" ' +
+
+                        (learned[code]
+                            ? "checked"
+                            : "") +
+
+                        ' onchange="toggleLearned(\'' +
+                        code +
+                        '\', this.checked)">' +
+
+                    ' I know this flag' +
+
+                '</label>' +
+
+                '<div class="status">' +
+
+                    (learned[code]
+                        ? "✓ Learned"
+                        : "") +
+
+                '</div>' +
+
+            '</div>';
+
+
+        grid.appendChild(card);
+
+    }
+
+
+    updateProgress();
+
+}
+
+
+/* =====================================================
+   SHOW ONE COUNTRY'S FLAG
+===================================================== */
+
+function showCountryFlag(code) {
+
+    var flag =
+        document.getElementById(
+            "flag-" + code
+        );
+
+    if (flag) {
+
+        flag.style.display = "block";
+
+    }
+
+}
+
+
+/* =====================================================
+   LEARNED CHECKBOX
+===================================================== */
+
+function toggleLearned(code, checked) {
+
+    /*
+     This ONLY changes the learned
+     progress.
+
+     It does NOT touch the flag.
+    */
+
+    if (checked) {
+
+        learned[code] = true;
+
+    } else {
+
+        delete learned[code];
+
+    }
+
+
+    saveProgress();
+
+
+    /*
+     Instead of rebuilding the entire
+     page, only update the progress
+     and the card's green border/status.
+
+     This prevents flags from opening.
+    */
+
+    var card =
+        document.getElementById(
+            "flag-" + code
+        ).parentElement;
+
+
+    if (checked) {
+
+        card.classList.add("learned");
+
+    } else {
+
+        card.classList.remove("learned");
+
+    }
+
+
+    var status =
+        card.querySelector(
+            ".status"
+        );
+
+
+    if (checked) {
+
+        status.innerHTML =
+            "✓ Learned";
+
+    } else {
+
+        status.innerHTML = "";
+
+    }
+
+
+    updateProgress();
+
+}
+
+
+/* =====================================================
+   SELECT ALL
+===================================================== */
+
+function selectAll() {
+
+    for (
+        var i = 0;
+        i < countries.length;
+        i++
+    ) {
+
+        learned[
+            countries[i][0]
+        ] = true;
+
+    }
+
+    saveProgress();
+
+    renderCountries();
+
+}
+
+
+/* =====================================================
+   RESET PROGRESS
+===================================================== */
+
+function resetProgress() {
+
+    var confirmed =
+        confirm(
+            "Are you sure you want to reset all your learned flags?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    learned = {};
+
+    saveProgress();
+
+    renderCountries();
+
+}
+
+
+/* =====================================================
+   GET LEARNED COUNTRIES
+===================================================== */
+
+function getLearnedCountries() {
+
+    var result = [];
+
+
+    for (
+        var i = 0;
+        i < countries.length;
+        i++
+    ) {
+
+        if (
+            learned[
+                countries[i][0]
+            ]
+        ) {
+
+            result.push(
+                countries[i]
+            );
+
+        }
+
+    }
+
+
+    return result;
+
+}
+
+
+/* =====================================================
+   SHUFFLE
+===================================================== */
+
+function shuffleArray(array) {
+
+    for (
+        var i = array.length - 1;
+        i > 0;
+        i--
+    ) {
+
+        var j =
+            Math.floor(
+                Math.random() *
+                (i + 1)
+            );
+
+
+        var temp =
+            array[i];
+
+        array[i] =
+            array[j];
+
+        array[j] =
+            temp;
+
+    }
+
+
+    return array;
+
+}
+
+
+/* =====================================================
+   PRACTICE VARIABLES
+===================================================== */
+
+var practiceMode = "";
+
+var practiceQueue = [];
+
+var currentCountry = null;
+
+var score = 0;
+
+var questions = 0;
+
+
+/* =====================================================
+   COUNTRY → FLAG
+===================================================== */
+
+function startCountryToFlag() {
+
+    var learnedCountries =
+        getLearnedCountries();
+
+
+    if (
+        learnedCountries.length === 0
+    ) {
+
+        alert(
+            "You haven't learned any flags yet!\n\n" +
+            "Tick the 'I know this flag' box for the countries you have learned."
+        );
+
+        return;
+
+    }
+
+
+    practiceMode =
+        "countryToFlag";
+
+
+    practiceQueue =
+        shuffleArray(
+            learnedCountries.slice()
+        );
+
+
+    score = 0;
+
+    questions = 0;
+
+
+    document.getElementById(
+        "practiceModal"
+    ).style.display =
+        "block";
+
+
+    nextQuestion();
+
+}
+
+
+/* =====================================================
+   FLAG → COUNTRY
+===================================================== */
+
+function startFlagToCountry() {
+
+    var learnedCountries =
+        getLearnedCountries();
+
+
+    if (
+        learnedCountries.length === 0
+    ) {
+
+        alert(
+            "You haven't learned any flags yet!\n\n" +
+            "Tick the 'I know this flag' box for the countries you have learned."
+        );
+
+        return;
+
+    }
+
+
+    practiceMode =
+        "flagToCountry";
+
+
+    practiceQueue =
+        shuffleArray(
+            learnedCountries.slice()
+        );
+
+
+    score = 0;
+
+    questions = 0;
+
+
+    document.getElementById(
+        "practiceModal"
+    ).style.display =
+        "block";
+
+
+    nextQuestion();
+
+}
+
+
+/* =====================================================
+   NEXT PRACTICE QUESTION
+===================================================== */
+
+function nextQuestion() {
+
+    var learnedCountries =
+        getLearnedCountries();
+
+
+    if (
+        learnedCountries.length === 0
+    ) {
+
+        closePractice();
+
+        return;
+
+    }
+
+
+    if (
+        practiceQueue.length === 0
+    ) {
+
+        practiceQueue =
+            shuffleArray(
+                learnedCountries.slice()
+            );
+
+    }
+
+
+    currentCountry =
+        practiceQueue.pop();
+
+
+    var area =
+        document.getElementById(
+            "practiceArea"
+        );
+
+
+    if (
+        practiceMode ===
+        "countryToFlag"
+    ) {
+
+        area.innerHTML =
+
+            '<div class="question">' +
+
+                currentCountry[1] +
+
+            '</div>' +
+
+
+            '<div ' +
+
+                'class="practice-flag hidden-flag" ' +
+
+                'id="practiceFlag" ' +
+
+                'onclick="revealFlag()">' +
+
+                getFlag(
+                    currentCountry[0]
+                ) +
+
+            '</div>' +
+
+
+            '<div class="result" id="result">' +
+
+                'Tap the flag to reveal it' +
+
+            '</div>';
+
+    }
+
+
+    else {
+
+        area.innerHTML =
+
+            '<div class="practice-flag">' +
+
+                getFlag(
+                    currentCountry[0]
+                ) +
+
+            '</div>' +
+
+
+            '<div class="question">' +
+
+                'Which country is this?' +
+
+            '</div>' +
+
+
+            '<input ' +
+
+                'class="answer-input" ' +
+
+                'id="answerInput" ' +
+
+                'type="text" ' +
+
+                'placeholder="Type country name">' +
+
+            '<br><br>' +
+
+
+            '<button onclick="checkAnswer()">' +
+
+                'Check Answer' +
+
+            '</button>' +
+
+
+            '<div class="result" id="result"></div>';
+
+    }
+
+
+    updateScore();
+
+}
+
+
+/* =====================================================
+   REVEAL PRACTICE FLAG
+===================================================== */
+
+function revealFlag() {
+
+    var flag =
+        document.getElementById(
+            "practiceFlag"
+        );
+
+
+    flag.className =
+        "practice-flag";
+
+
+    document.getElementById(
+        "result"
+    ).innerHTML =
+
+        "✓ That's the flag of " +
+        currentCountry[1];
+
+}
+
+
+/* =====================================================
+   CHECK PRACTICE ANSWER
+===================================================== */
+
+function checkAnswer() {
+
+    var input =
+        document.getElementById(
+            "answerInput"
+        );
+
+
+    var result =
+        document.getElementById(
+            "result"
+        );
+
+
+    var answer =
+        input.value
+            .trim()
+            .toLowerCase();
+
+
+    var correct =
+        currentCountry[1]
+            .toLowerCase();
+
+
+    var alternatives = {
+
+        "türkiye": "turkey",
+
+        "czech republic": "czechia",
+
+        "republic of korea":
+            "south korea",
+
+        "democratic people's republic of korea":
+            "north korea",
+
+        "vatican":
+            "vatican city",
+
+        "holy see":
+            "vatican city",
+
+        "burma":
+            "myanmar",
+
+        "cape verde":
+            "cabo verde",
+
+        "swaziland":
+            "eswatini"
+
+    };
+
+
+    if (
+        answer === correct ||
+        alternatives[answer] === correct
+    ) {
+
+        result.innerHTML =
+            "✅ Correct!";
+
+        result.style.color =
+            "#16a34a";
+
+        score++;
+
+        questions++;
+
+    }
+
+    else {
+
+        result.innerHTML =
+            "❌ Not quite. The answer is " +
+            currentCountry[1];
+
+        result.style.color =
+            "#dc2626";
+
+        questions++;
+
+    }
+
+
+    updateScore();
+
+}
+
+
+/* =====================================================
+   SCORE
+===================================================== */
+
+function updateScore() {
+
+    document.getElementById(
+        "scoreText"
+    ).innerHTML =
+
+        "Score: " +
+        score +
+        " / " +
+        questions;
+
+}
+
+
+/* =====================================================
+   CLOSE PRACTICE
+===================================================== */
+
+function closePractice() {
+
+    document.getElementById(
+        "practiceModal"
+    ).style.display =
+        "none";
+
+}
+
+
+/* =====================================================
+   SHUFFLE COUNTRY GRID
+===================================================== */
+
+function shuffleCountries() {
+
+    countries =
+        shuffleArray(
+            countries
+        );
+
+    renderCountries();
+
+}
+
+
+/* =====================================================
+   SHOW ALL FLAGS
+===================================================== */
+
+function showAllFlags() {
+
+    var flags =
+        document.querySelectorAll(
+            ".flag"
+        );
+
+
+    for (
+        var i = 0;
+        i < flags.length;
+        i++
+    ) {
+
+        flags[i].style.display =
+            "block";
+
+    }
+
+}
+
+
+/* =====================================================
+   HIDE ALL FLAGS
+===================================================== */
+
+function hideAllFlags() {
+
+    var flags =
+        document.querySelectorAll(
+            ".flag"
+        );
+
+
+    for (
+        var i = 0;
+        i < flags.length;
+        i++
+    ) {
+
+        flags[i].style.display =
+            "none";
+
+    }
+
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+loadProgress();
+
+renderCountries();
+
+</script>
+
+</body>
+</html>
